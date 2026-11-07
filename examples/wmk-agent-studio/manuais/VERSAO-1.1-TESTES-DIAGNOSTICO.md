@@ -47,3 +47,17 @@ O objeto `services` informa `online` ou `offline`, latência em milissegundos ou
 
 O script validate_real_image.py submete workflow real 256x256, 5 steps, seed 42 e LoRA 0.7; consulta historico por ate 10 minutos. A resposta inicial do ComfyUI confirmou prompt_id e node_errors vazio, mas isso ainda nao comprova que a imagem terminou.
 
+
+
+## Evidência de geração real — confirmada
+Em 07/11/2026, a API ComfyUI retornou `execution_success` para o job `b2df4498-a06c-4c1c-a7dc-4ac8ca894001`, com arquivo `WMK_Agent_Studio_00005_.png` (256×256), seed 42, 5 steps e LoRA 0,7. Tempo de execução aproximado: 174 segundos. A qualidade visual não foi inspecionada.
+
+## Consulta de fila e cancelamento conservador
+- `GET /api/image-queue`: contagem de jobs pendentes e em execução no ComfyUI.
+- `POST /api/cancel-image`: corpo JSON `{"prompt_id":"UUID"}`. Solicita exclusão somente quando o job estiver na fila **pendente**.
+- Se o job já estiver executando, retorna HTTP 409 e não interrompe a geração. Se não estiver pendente, retorna HTTP 404.
+- `cancel_requested` significa solicitação enviada, **não confirmação definitiva** de cancelamento.
+- Quatro testes simulados de cancelamento passaram, totalizando **11 testes automatizados**.
+
+**Limitações:** ainda não existe fila persistente própria, nem autenticação/controle de propriedade de jobs. A aplicação deve permanecer acessível apenas via localhost. O teste de cancelamento não removeu jobs reais de outros usuários.
+
