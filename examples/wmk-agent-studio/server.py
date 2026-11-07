@@ -109,6 +109,11 @@ class Handler(BaseHTTPRequestHandler):
    img=(folder/name).resolve()
    if not img.is_relative_to(root) or not img.is_file() or img.suffix.lower()!='.png': return self.fail('Imagem não encontrada',404)
    b=img.read_bytes(); self.send_response(200); self.send_header('Content-Type','image/png'); self.send_header('Content-Disposition','attachment; filename=WMK_'+Path(name).name); self.send_header('Content-Length',str(len(b))); self.send_header('Cache-Control','no-store'); self.end_headers(); self.wfile.write(b); return
+  if path=='/api/image-queue':
+   try:
+    q=call('http://127.0.0.1:8188/queue',timeout=5)
+    return self.reply({'running':len(q.get('queue_running',[])),'pending':len(q.get('queue_pending',[])),'source':'comfyui'})
+   except ValueError as exc: return self.fail('Fila ComfyUI indisponivel',502)
   if path=='/api/health': return self.reply(health_report())
   if path=='/manuais' or path=='/manuais/': path='/manuais/index.html'
   if path in ('/','/index.html'): path='/index.html'
@@ -127,6 +132,7 @@ class Handler(BaseHTTPRequestHandler):
    if self.path=='/api/delete': return self.delete_item(payload)
    if self.path=='/api/chat': return self.chat(payload)
    if self.path=='/api/generate-image': return self.generate_image(payload)
+   if self.path=='/api/cancel-image': return self.cancel_image(payload)
    if self.path=='/api/agent-chat': return self.agent_chat(payload)
    if self.path=='/api/approve-tool': return self.approve_tool(payload)
    return self.fail('Rota inválida',404)
@@ -280,6 +286,20 @@ class Handler(BaseHTTPRequestHandler):
     c['messages'].append({'role':'assistant','content':'Workflow enviado ao ComfyUI. Acompanhe a geração abaixo.','image_job':res['prompt_id'],'time':now()})
     save(state)
   return self.reply({'ok':True,'state':'queued','prompt_id':res['prompt_id']})
+ def cancel_image(self,payload):
+  pid=str(payload.get('prompt_id',''))
+  try: uuid.UUID(pid)
+  except (ValueError,AttributeError): return self.fail('ID de geracao invalido')
+  queue=call('http://127.0.0.1:8188/queue',timeout=5)
+  def ids(entries):
+   return [str(item[1]) for item in entries if isinstance(item,(list,tuple)) and len(item)>1]
+  if pid in ids(queue.get('queue_running',[])):
+   return self.reply({'ok':False,'state':'running','message':'Geracao em execucao. Cancelamento automatico bloqueado para nao interromper outros trabalhos.'},409)
+  if pid not in ids(queue.get('queue_pending',[])):
+   return self.reply({'ok':False,'state':'not_pending','message':'Geracao nao encontrada na fila pendente.'},404)
+  call('http://127.0.0.1:8188/queue','POST',{'delete':[pid]},timeout=10)
+  event('INFO','image_cancel_requested',prompt_id=pid)
+  return self.reply({'ok':True,'state':'cancel_requested','prompt_id':pid})
  def generate_image_job(self,cid,settings):
    q=call('http://127.0.0.1:8188/queue',timeout=5)
    if q.get('queue_running') or q.get('queue_pending'): raise ValueError('ComfyUI ocupado: aguarde a fila')
