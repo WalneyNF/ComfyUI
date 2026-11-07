@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+data/
+*.log
+.env
+.env.*
+*.safetensors
+*.ckpt
+*.pt
+*.pth
+*.png
+*.jpg
+*.jpeg
+*.zip
