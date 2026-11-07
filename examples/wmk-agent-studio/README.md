@@ -144,3 +144,8 @@ WMK-Agent-Studio/
 **Créditos:** Walney Moreira Klein — walneyk@hotmail.com
 
 > Documentação destinada a estudo e colaboração. Não publique arquivos de pesos de terceiros sem verificar suas licenças, nem dados pessoais, chaves de API ou arquivos de estado local.
+
+## Versao 1.1 - testes e diagnostico
+
+Consulte [o relatorio de validacao](manuais/VERSAO-1.1-TESTES-DIAGNOSTICO.md). Status: parcial, com 7 testes automatizados aprovados; geracao final de PNG com LoRA ainda pendente.
+

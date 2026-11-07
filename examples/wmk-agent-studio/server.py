@@ -2,7 +2,32 @@
 from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
 from pathlib import Path
 from urllib import request, error, parse
-import json, os, uuid, datetime, threading
+import json, os, uuid, datetime, threading, logging, time, re
+
+LOG=logging.getLogger('wmk')
+if not LOG.handlers:
+ handler=logging.StreamHandler()
+ handler.setFormatter(logging.Formatter('%(message)s'))
+ LOG.addHandler(handler)
+LOG.setLevel(logging.INFO)
+def event(level,kind,**fields):
+ payload={'time':datetime.datetime.now(datetime.timezone.utc).isoformat(),'level':level,'event':kind}
+ payload.update(fields)
+ getattr(LOG,level.lower(),LOG.info)(json.dumps(payload,ensure_ascii=False,default=str))
+def probe(url,timeout=2):
+ started=time.monotonic()
+ try:
+  req=request.Request(url,headers={'User-Agent':'WMK-Agent-Studio/1.1'})
+  with request.urlopen(req,timeout=timeout) as resp:
+   if resp.status!=200: raise ValueError('HTTP '+str(resp.status))
+   resp.read(2048)
+  return {'status':'online','latency_ms':round((time.monotonic()-started)*1000)}
+ except Exception as exc:
+  return {'status':'offline','error_type':type(exc).__name__}
+def health_report():
+ services={'ollama':probe('http://127.0.0.1:11434/api/tags'),
+           'comfyui':probe('http://127.0.0.1:8188/system_stats')}
+ return {'ok':True,'service':'WMK Agent Studio','version':'1.1','time':datetime.datetime.now(datetime.timezone.utc).isoformat(),'services':services}
 
 ROOT=Path(__file__).resolve().parent
 DATA=ROOT/'data'; DATA.mkdir(exist_ok=True)
@@ -45,7 +70,7 @@ def model_list(p):
   return [x.get('name') for x in call(url+'/api/tags').get('models',[]) if x.get('name')]
  return [x.get('id') for x in call(url+'/models',key=p.get('api_key')).get('data',[]) if x.get('id')]
 class Handler(BaseHTTPRequestHandler):
- def log_message(self,fmt,*args): print('[WMK]',fmt%args,flush=True)
+ def log_message(self,fmt,*args): event('INFO','http_request',message=fmt%args)
  def reply(self,data,status=200):
   raw=json.dumps(data,ensure_ascii=False).encode()
   self.send_response(status); self.send_header('Content-Type','application/json; charset=utf-8'); self.send_header('Cache-Control','no-store'); self.send_header('X-Content-Type-Options','nosniff'); self.send_header('Content-Length',str(len(raw))); self.end_headers(); self.wfile.write(raw)
@@ -84,7 +109,7 @@ class Handler(BaseHTTPRequestHandler):
    img=(folder/name).resolve()
    if not img.is_relative_to(root) or not img.is_file() or img.suffix.lower()!='.png': return self.fail('Imagem não encontrada',404)
    b=img.read_bytes(); self.send_response(200); self.send_header('Content-Type','image/png'); self.send_header('Content-Disposition','attachment; filename=WMK_'+Path(name).name); self.send_header('Content-Length',str(len(b))); self.send_header('Cache-Control','no-store'); self.end_headers(); self.wfile.write(b); return
-  if path=='/api/health': return self.reply({'ok':True,'service':'WMK Agent Studio','time':now()})
+  if path=='/api/health': return self.reply(health_report())
   if path=='/manuais' or path=='/manuais/': path='/manuais/index.html'
   if path in ('/','/index.html'): path='/index.html'
   if path.startswith('/api/'): return self.fail('Rota não encontrada',404)
@@ -105,8 +130,10 @@ class Handler(BaseHTTPRequestHandler):
    if self.path=='/api/agent-chat': return self.agent_chat(payload)
    if self.path=='/api/approve-tool': return self.approve_tool(payload)
    return self.fail('Rota inválida',404)
-  except (ValueError,KeyError,TypeError) as e: return self.fail(e)
-  except Exception as e: return self.fail('Erro interno: '+str(e),500)
+  except (ValueError,KeyError,TypeError) as e:
+   event('WARNING','request_rejected',reason=type(e).__name__);return self.fail(e)
+  except Exception as e:
+   event('ERROR','request_failed',error_type=type(e).__name__);return self.fail('Erro interno. Consulte os logs do servidor.',500)
  def agent_chat(self,payload):
   cid=str(payload.get('chat_id','')); message=str(payload.get('text','')).strip()
   if not message or len(message)>4000: return self.fail('Mensagem inválida')
@@ -257,8 +284,10 @@ class Handler(BaseHTTPRequestHandler):
    q=call('http://127.0.0.1:8188/queue',timeout=5)
    if q.get('queue_running') or q.get('queue_pending'): raise ValueError('ComfyUI ocupado: aguarde a fila')
    nodes=self.workflow_nodes(settings)
+   event('INFO','image_submit',node_count=len(nodes),lora_enabled='8' in nodes)
    res=call('http://127.0.0.1:8188/prompt','POST',{'prompt':nodes,'client_id':'wmk-agent-studio'},timeout=30)
    if res.get('node_errors') or not res.get('prompt_id'): raise ValueError('ComfyUI rejeitou o workflow: '+str(res.get('node_errors')))
+   event('INFO','image_queued',prompt_id=res['prompt_id'])
    return {'prompt_id':res['prompt_id']}
  def generate_image(self,payload):
    settings=self.image_settings(payload)
