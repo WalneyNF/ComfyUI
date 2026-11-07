@@ -42,3 +42,8 @@ O objeto `services` informa `online` ou `offline`, latência em milissegundos ou
 5. Revisar dependências, caminhos absolutos e política de atualização do fork.
 
 **Status:** implementação parcial validada. A v1.1 não deve ser marcada como concluída.
+
+## Teste real de geracao (em andamento)
+
+O script validate_real_image.py submete workflow real 256x256, 5 steps, seed 42 e LoRA 0.7; consulta historico por ate 10 minutos. A resposta inicial do ComfyUI confirmou prompt_id e node_errors vazio, mas isso ainda nao comprova que a imagem terminou.
+
