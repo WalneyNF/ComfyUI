@@ -1,344 +1,161 @@
-﻿> **Documentacao WMK em portugues:** [README WMK PT-BR](README_WMK_PT-BR.md) | [WMK Agent Studio, codigo e manuais](examples/wmk-agent-studio/) | [Manual de modelos e LoRA](examples/wmk-agent-studio/manuais/GUIA-MODELOS-LORA-COMFYUI.html)
+# ComfyUI — Fork WMK (documentação em português)
 
-<div align="center">
+Este repositório é um **fork do ComfyUI**, uma interface e motor de geração de imagens com workflows visuais. O código original do ComfyUI continua no repositório. Também adicionamos o **WMK Agent Studio**, uma aplicação independente para conversar com modelos de linguagem e solicitar imagens ao ComfyUI.
 
-# ComfyUI
-**The most powerful and modular diffusion model GUI and backend.**
+**Créditos do material WMK:** Walney Moreira Klein — walneyk@hotmail.com.
 
+## Comece por aqui
 
-[![Website][website-shield]][website-url]
-[![Dynamic JSON Badge][discord-shield]][discord-url]
-[![Matrix][matrix-shield]][matrix-url]
-<br>
-[![][github-release-shield]][github-release-link]
-[![][github-release-date-shield]][github-release-link]
-[![][github-downloads-shield]][github-downloads-link]
-[![][github-downloads-latest-shield]][github-downloads-link]
+- **ComfyUI:** consulte o [README original em inglês](README_ORIGINAL_EN.md) para requisitos e instruções oficiais do projeto upstream. O ComfyUI pode ser iniciado conforme sua instalação; não exige o WMK Agent Studio.
+- **WMK Agent Studio:** [código, interface e instruções](examples/wmk-agent-studio/).
+- **Manuais em português:** [Central de manuais](examples/wmk-agent-studio/manuais/index.html), [Academia WMK](examples/wmk-agent-studio/manuais/ACADEMIA-WMK.html) e [Guia de modelos e LoRA](examples/wmk-agent-studio/manuais/GUIA-MODELOS-LORA-COMFYUI.html).
 
-[matrix-shield]: https://img.shields.io/badge/Matrix-000000?style=flat&logo=matrix&logoColor=white
-[matrix-url]: https://app.element.io/#/room/%23comfyui_space%3Amatrix.org
-[website-shield]: https://img.shields.io/badge/ComfyOrg-4285F4?style=flat
-[website-url]: https://www.comfy.org/
-<!-- Workaround to display total user from https://github.com/badges/shields/issues/4500#issuecomment-2060079995 -->
-[discord-shield]: https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fdiscord.com%2Fapi%2Finvites%2Fcomfyorg%3Fwith_counts%3Dtrue&query=%24.approximate_member_count&logo=discord&logoColor=white&label=Discord&color=green&suffix=%20total
-[discord-url]: https://www.comfy.org/discord
+> **Importante:** o WMK Agent Studio é uma ferramenta complementar, não uma substituição da interface original do ComfyUI. Os comandos com caminhos `D:\` abaixo descrevem a máquina de desenvolvimento; ajuste-os ao instalar em outro computador.
 
-[github-release-shield]: https://img.shields.io/github/v/release/comfyanonymous/ComfyUI?style=flat&sort=semver
-[github-release-link]: https://github.com/comfyanonymous/ComfyUI/releases
-[github-release-date-shield]: https://img.shields.io/github/release-date/comfyanonymous/ComfyUI?style=flat
-[github-downloads-shield]: https://img.shields.io/github/downloads/comfyanonymous/ComfyUI/total?style=flat
-[github-downloads-latest-shield]: https://img.shields.io/github/downloads/comfyanonymous/ComfyUI/latest/total?style=flat&label=downloads%40latest
-[github-downloads-link]: https://github.com/comfyanonymous/ComfyUI/releases
+---
+# WMK Agent Studio — Chat com IA e geração de imagens (PT-BR)
 
-![ComfyUI Screenshot](https://github.com/user-attachments/assets/7ccaf2c1-9b72-41ae-9a89-5688c94b7abe)
-</div>
+**Autor:** Walney Moreira Klein — walneyk@hotmail.com
 
-This ui will let you design and execute advanced stable diffusion pipelines using a graph/nodes/flowchart based interface. For some workflow examples and see what ComfyUI can do you can check out:
-### [ComfyUI Examples](https://comfyanonymous.github.io/ComfyUI_examples/)
+Projeto local em Python + HTML/CSS/JavaScript para conversar com agentes de IA e gerar imagens usando **ComfyUI**. Integra **Ollama** (modelos locais de texto), provedores de API compatíveis com OpenAI (como Groq) e um gerador de imagens baseado em workflows.
 
-### [Installing ComfyUI](#installing)
+> **Situação:** interface e integração API implementadas. O desempenho de geração depende do hardware; a integração do LoRA Pixel Art foi adicionada ao código, mas **a geração final com esse LoRA ainda não foi validada**. Não confunda integração de código com qualidade visual comprovada.
 
-## Features
-- Nodes/graph/flowchart interface to experiment and create complex Stable Diffusion workflows without needing to code anything.
-- Image Models
-   - SD1.x, SD2.x,
-   - [SDXL](https://comfyanonymous.github.io/ComfyUI_examples/sdxl/), [SDXL Turbo](https://comfyanonymous.github.io/ComfyUI_examples/sdturbo/)
-   - [Stable Cascade](https://comfyanonymous.github.io/ComfyUI_examples/stable_cascade/)
-   - [SD3 and SD3.5](https://comfyanonymous.github.io/ComfyUI_examples/sd3/)
-   - Pixart Alpha and Sigma
-   - [AuraFlow](https://comfyanonymous.github.io/ComfyUI_examples/aura_flow/)
-   - [HunyuanDiT](https://comfyanonymous.github.io/ComfyUI_examples/hunyuan_dit/)
-   - [Flux](https://comfyanonymous.github.io/ComfyUI_examples/flux/)
-- Video Models
-   - [Stable Video Diffusion](https://comfyanonymous.github.io/ComfyUI_examples/video/)
-   - [Mochi](https://comfyanonymous.github.io/ComfyUI_examples/mochi/)
-   - [LTX-Video](https://comfyanonymous.github.io/ComfyUI_examples/ltxv/)
-   - [Hunyuan Video](https://comfyanonymous.github.io/ComfyUI_examples/hunyuan_video/)
-- [Stable Audio](https://comfyanonymous.github.io/ComfyUI_examples/audio/)
-- Asynchronous Queue system
-- Many optimizations: Only re-executes the parts of the workflow that changes between executions.
-- Smart memory management: can automatically run models on GPUs with as low as 1GB vram.
-- Works even if you don't have a GPU with: ```--cpu``` (slow)
-- Can load ckpt, safetensors and diffusers models/checkpoints. Standalone VAEs and CLIP models.
-- Embeddings/Textual inversion
-- [Loras (regular, locon and loha)](https://comfyanonymous.github.io/ComfyUI_examples/lora/)
-- [Hypernetworks](https://comfyanonymous.github.io/ComfyUI_examples/hypernetworks/)
-- Loading full workflows (with seeds) from generated PNG, WebP and FLAC files.
-- Saving/Loading workflows as Json files.
-- Nodes interface can be used to create complex workflows like one for [Hires fix](https://comfyanonymous.github.io/ComfyUI_examples/2_pass_txt2img/) or much more advanced ones.
-- [Area Composition](https://comfyanonymous.github.io/ComfyUI_examples/area_composition/)
-- [Inpainting](https://comfyanonymous.github.io/ComfyUI_examples/inpaint/) with both regular and inpainting models.
-- [ControlNet and T2I-Adapter](https://comfyanonymous.github.io/ComfyUI_examples/controlnet/)
-- [Upscale Models (ESRGAN, ESRGAN variants, SwinIR, Swin2SR, etc...)](https://comfyanonymous.github.io/ComfyUI_examples/upscale_models/)
-- [unCLIP Models](https://comfyanonymous.github.io/ComfyUI_examples/unclip/)
-- [GLIGEN](https://comfyanonymous.github.io/ComfyUI_examples/gligen/)
-- [Model Merging](https://comfyanonymous.github.io/ComfyUI_examples/model_merging/)
-- [LCM models and Loras](https://comfyanonymous.github.io/ComfyUI_examples/lcm/)
-- Latent previews with [TAESD](#how-to-show-high-quality-previews)
-- Starts up very fast.
-- Works fully offline: will never download anything.
-- [Config file](extra_model_paths.yaml.example) to set the search paths for models.
+## 1. Recursos e ferramentas
 
-Workflow examples can be found on the [Examples page](https://comfyanonymous.github.io/ComfyUI_examples/)
+| Ferramenta | Função | Acesso |
+|---|---|---|
+| WMK Agent Studio | Conversas, agentes, configuração de provedores, aprovação de geração | [Abrir localmente](http://127.0.0.1:8765) |
+| Gerador de imagens | Prompts positivo/negativo, resolução, steps, CFG, sampler, scheduler, seed e LoRA | Botão **Gerar imagem** no Studio |
+| Grafo de workflow | Inspeção e exportação do JSON de API enviado ao ComfyUI | Botão **Ver grafo** |
+| ComfyUI | Motor de geração de imagens por nós | [Abrir localmente](http://127.0.0.1:8188) |
+| Ollama | IA local de texto, interpretação do pedido e propostas de imagem | [API local](http://127.0.0.1:11434/api/tags) |
+| Histórico de imagens | Exibição de imagens e download PNG no chat | Conversa no Studio |
 
-## Shortcuts
+Os links `127.0.0.1` só funcionam **no computador onde os serviços estão rodando**.
 
-| Keybind                            | Explanation                                                                                                        |
-|------------------------------------|--------------------------------------------------------------------------------------------------------------------|
-| `Ctrl` + `Enter`                      | Queue up current graph for generation                                                                              |
-| `Ctrl` + `Shift` + `Enter`              | Queue up current graph as first for generation                                                                     |
-| `Ctrl` + `Alt` + `Enter`                | Cancel current generation                                                                                          |
-| `Ctrl` + `Z`/`Ctrl` + `Y`                 | Undo/Redo                                                                                                          |
-| `Ctrl` + `S`                          | Save workflow                                                                                                      |
-| `Ctrl` + `O`                          | Load workflow                                                                                                      |
-| `Ctrl` + `A`                          | Select all nodes                                                                                                   |
-| `Alt `+ `C`                           | Collapse/uncollapse selected nodes                                                                                 |
-| `Ctrl` + `M`                          | Mute/unmute selected nodes                                                                                         |
-| `Ctrl` + `B`                           | Bypass selected nodes (acts like the node was removed from the graph and the wires reconnected through)            |
-| `Delete`/`Backspace`                   | Delete selected nodes                                                                                              |
-| `Ctrl` + `Backspace`                   | Delete the current graph                                                                                           |
-| `Space`                              | Move the canvas around when held and moving the cursor                                                             |
-| `Ctrl`/`Shift` + `Click`                 | Add clicked node to selection                                                                                      |
-| `Ctrl` + `C`/`Ctrl` + `V`                  | Copy and paste selected nodes (without maintaining connections to outputs of unselected nodes)                     |
-| `Ctrl` + `C`/`Ctrl` + `Shift` + `V`          | Copy and paste selected nodes (maintaining connections from outputs of unselected nodes to inputs of pasted nodes) |
-| `Shift` + `Drag`                       | Move multiple selected nodes at the same time                                                                      |
-| `Ctrl` + `D`                           | Load default graph                                                                                                 |
-| `Alt` + `+`                          | Canvas Zoom in                                                                                                     |
-| `Alt` + `-`                          | Canvas Zoom out                                                                                                    |
-| `Ctrl` + `Shift` + LMB + Vertical drag | Canvas Zoom in/out                                                                                                 |
-| `P`                                  | Pin/Unpin selected nodes                                                                                           |
-| `Ctrl` + `G`                           | Group selected nodes                                                                                               |
-| `Q`                                 | Toggle visibility of the queue                                                                                     |
-| `H`                                  | Toggle visibility of history                                                                                       |
-| `R`                                  | Refresh graph                                                                                                      |
-| `F`                                  | Show/Hide menu                                                                                                      |
-| `.`                                  | Fit view to selection (Whole graph when nothing is selected)                                                        |
-| Double-Click LMB                   | Open node quick search palette                                                                                     |
-| `Shift` + Drag                       | Move multiple wires at once                                                                                        |
-| `Ctrl` + `Alt` + LMB                   | Disconnect all wires from clicked slot                                                                             |
+## 2. Documentação completa
 
-`Ctrl` can also be replaced with `Cmd` instead for macOS users
+- **[Central de manuais — instalação, chat, agentes, ComfyUI, MCP, CPU e diagnóstico](manuais/index.html)**
+- **[Academia WMK — curso do básico ao desenvolvimento](manuais/ACADEMIA-WMK.html)**
+- **[Modelos, Checkpoints, LoRA e parâmetros de geração — guia detalhado](manuais/GUIA-MODELOS-LORA-COMFYUI.html)**
+- **[Manual resumido do usuário](manuais/MANUAL-PTBR.md)**
 
-# Installing
+Para acessar os manuais pelo navegador com o servidor ligado:
 
-## Windows
+- [Central de manuais](http://127.0.0.1:8765/manuais/)
+- [Academia WMK](http://127.0.0.1:8765/manuais/ACADEMIA-WMK.html)
+- [Guia de modelos e LoRA](http://127.0.0.1:8765/manuais/GUIA-MODELOS-LORA-COMFYUI.html)
 
-There is a portable standalone build for Windows that should work for running on Nvidia GPUs or for running on your CPU only on the [releases page](https://github.com/comfyanonymous/ComfyUI/releases).
+## 3. Requisitos e limitações
 
-### [Direct link to download](https://github.com/comfyanonymous/ComfyUI/releases/latest/download/ComfyUI_windows_portable_nvidia.7z)
+- Windows, Python 3.13 usado no ambiente de desenvolvimento; o backend utiliza principalmente a biblioteca padrão.
+- Ollama instalado e iniciado para conversas com modelos locais, **ou** uma API externa compatível devidamente configurada.
+- ComfyUI instalado com ambiente Python e dependências próprias, para geração de imagens.
+- Checkpoint SD 1.5 em `ComfyUI/models/checkpoints/`. O modelo usado no desenvolvimento foi `v1-5-pruned-emaonly.safetensors`.
+- LoRA opcional em `ComfyUI/models/loras/`. O arquivo usado no desenvolvimento foi `pytorch_lora_weights.safetensors`.
+- Na máquina de desenvolvimento, ComfyUI usa **CPU**, com aproximadamente 16 GB de RAM. Resoluções maiores e mais steps podem demorar muito. Sem GPU adequada, não espere geração rápida.
 
-Simply download, extract with [7-Zip](https://7-zip.org) and run. Make sure you put your Stable Diffusion checkpoints/models (the huge ckpt/safetensors files) in: ComfyUI\models\checkpoints
+**Atenção à portabilidade:** esta versão contém caminhos absolutos específicos do Windows, especialmente `D:\IA-Local\ComfyUI\output` no servidor. Em outro computador, ajuste esses caminhos e o arquivo `INICIAR-WMK.bat`. O projeto não possui instalador automático.
 
-If you have trouble extracting it, right click the file -> properties -> unblock
+## 4. Instalação e inicialização no Windows
 
-#### How do I share models between another UI and ComfyUI?
+1. Baixe ou clone o código do repositório para uma pasta de sua escolha.
+2. Instale Python e verifique com `python --version`.
+3. Instale o [Ollama](https://ollama.com/) e obtenha um modelo de texto, por exemplo `ollama pull qwen2.5-coder:3b`.
+4. Instale o [ComfyUI](https://github.com/Comfy-Org/ComfyUI), configure suas dependências conforme o hardware e instale um checkpoint compatível.
+5. No ComfyUI, coloque checkpoints em `models/checkpoints/` e LoRAs em `models/loras/`.
+6. Inicie cada serviço em um terminal diferente. Os exemplos abaixo correspondem à máquina de desenvolvimento; **ajuste os caminhos no seu computador**.
 
-See the [Config file](extra_model_paths.yaml.example) to set the search paths for models. In the standalone windows build you can find this file in the ComfyUI directory. Rename this file to extra_model_paths.yaml and edit it with your favorite text editor.
+### Terminal A — Ollama
 
-## Jupyter Notebook
-
-To run it on services like paperspace, kaggle or colab you can use my [Jupyter Notebook](notebooks/comfyui_colab.ipynb)
-
-## Manual Install (Windows, Linux)
-
-Note that some dependencies do not yet support python 3.13 so using 3.12 is recommended.
-
-Git clone this repo.
-
-Put your SD checkpoints (the huge ckpt/safetensors files) in: models/checkpoints
-
-Put your VAE in: models/vae
-
-
-### AMD GPUs (Linux only)
-AMD users can install rocm and pytorch with pip if you don't have it already installed, this is the command to install the stable version:
-
-```pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/rocm6.2```
-
-This is the command to install the nightly with ROCm 6.2 which might have some performance improvements:
-
-```pip install --pre torch torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/rocm6.2.4```
-
-### Intel GPUs (Windows and Linux)
-
-(Option 1) Intel Arc GPU users can install native PyTorch with torch.xpu support using pip (currently available in PyTorch nightly builds). More information can be found [here](https://pytorch.org/docs/main/notes/get_start_xpu.html)
-  
-1. To install PyTorch nightly, use the following command:
-
-```pip install --pre torch torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/xpu```
-
-2. Launch ComfyUI by running `python main.py`
-
-
-(Option 2) Alternatively, Intel GPUs supported by Intel Extension for PyTorch (IPEX) can leverage IPEX for improved performance.
-
-1. For Intel® Arc™ A-Series Graphics utilizing IPEX, create a conda environment and use the commands below:
-
-```
-conda install libuv
-pip install torch==2.3.1.post0+cxx11.abi torchvision==0.18.1.post0+cxx11.abi torchaudio==2.3.1.post0+cxx11.abi intel-extension-for-pytorch==2.3.110.post0+xpu --extra-index-url https://pytorch-extension.intel.com/release-whl/stable/xpu/us/ --extra-index-url https://pytorch-extension.intel.com/release-whl/stable/xpu/cn/
+```powershell
+ollama serve
 ```
 
-For other supported Intel GPUs with IPEX, visit [Installation](https://intel.github.io/intel-extension-for-pytorch/index.html#installation?platform=gpu) for more information.
+Se já estiver ativo, não abra uma segunda instância. Teste em `http://127.0.0.1:11434/api/tags`.
 
-Additional discussion and help can be found [here](https://github.com/comfyanonymous/ComfyUI/discussions/476).
+### Terminal B — ComfyUI (CPU, exemplo local)
 
-### NVIDIA
-
-Nvidia users should install stable pytorch using this command:
-
-```pip install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu124```
-
-This is the command to install pytorch nightly instead which might have performance improvements:
-
-```pip install --pre torch torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/cu126```
-
-#### Troubleshooting
-
-If you get the "Torch not compiled with CUDA enabled" error, uninstall torch with:
-
-```pip uninstall torch```
-
-And install it again with the command above.
-
-### Dependencies
-
-Install the dependencies by opening your terminal inside the ComfyUI folder and:
-
-```pip install -r requirements.txt```
-
-After this you should have everything installed and can proceed to running ComfyUI.
-
-### Others:
-
-#### Apple Mac silicon
-
-You can install ComfyUI in Apple Mac silicon (M1 or M2) with any recent macOS version.
-
-1. Install pytorch nightly. For instructions, read the [Accelerated PyTorch training on Mac](https://developer.apple.com/metal/pytorch/) Apple Developer guide (make sure to install the latest pytorch nightly).
-1. Follow the [ComfyUI manual installation](#manual-install-windows-linux) instructions for Windows and Linux.
-1. Install the ComfyUI [dependencies](#dependencies). If you have another Stable Diffusion UI [you might be able to reuse the dependencies](#i-already-have-another-ui-for-stable-diffusion-installed-do-i-really-have-to-install-all-of-these-dependencies).
-1. Launch ComfyUI by running `python main.py`
-
-> **Note**: Remember to add your models, VAE, LoRAs etc. to the corresponding Comfy folders, as discussed in [ComfyUI manual installation](#manual-install-windows-linux).
-
-#### DirectML (AMD Cards on Windows)
-
-```pip install torch-directml``` Then you can launch ComfyUI with: ```python main.py --directml```
-
-#### Ascend NPUs
-
-For models compatible with Ascend Extension for PyTorch (torch_npu). To get started, ensure your environment meets the prerequisites outlined on the [installation](https://ascend.github.io/docs/sources/ascend/quick_install.html) page. Here's a step-by-step guide tailored to your platform and installation method:
-
-1. Begin by installing the recommended or newer kernel version for Linux as specified in the Installation page of torch-npu, if necessary.
-2. Proceed with the installation of Ascend Basekit, which includes the driver, firmware, and CANN, following the instructions provided for your specific platform.
-3. Next, install the necessary packages for torch-npu by adhering to the platform-specific instructions on the [Installation](https://ascend.github.io/docs/sources/pytorch/install.html#pytorch) page.
-4. Finally, adhere to the [ComfyUI manual installation](#manual-install-windows-linux) guide for Linux. Once all components are installed, you can run ComfyUI as described earlier.
-
-
-# Running
-
-```python main.py```
-
-### For AMD cards not officially supported by ROCm
-
-Try running it with this command if you have issues:
-
-For 6700, 6600 and maybe other RDNA2 or older: ```HSA_OVERRIDE_GFX_VERSION=10.3.0 python main.py```
-
-For AMD 7600 and maybe other RDNA3 cards: ```HSA_OVERRIDE_GFX_VERSION=11.0.0 python main.py```
-
-### AMD ROCm Tips
-
-You can enable experimental memory efficient attention on pytorch 2.5 in ComfyUI on RDNA3 and potentially other AMD GPUs using this command:
-
-```TORCH_ROCM_AOTRITON_ENABLE_EXPERIMENTAL=1 python main.py --use-pytorch-cross-attention```
-
-You can also try setting this env variable `PYTORCH_TUNABLEOP_ENABLED=1` which might speed things up at the cost of a very slow initial run.
-
-# Notes
-
-Only parts of the graph that have an output with all the correct inputs will be executed.
-
-Only parts of the graph that change from each execution to the next will be executed, if you submit the same graph twice only the first will be executed. If you change the last part of the graph only the part you changed and the part that depends on it will be executed.
-
-Dragging a generated png on the webpage or loading one will give you the full workflow including seeds that were used to create it.
-
-You can use () to change emphasis of a word or phrase like: (good code:1.2) or (bad code:0.8). The default emphasis for () is 1.1. To use () characters in your actual prompt escape them like \\( or \\).
-
-You can use {day|night}, for wildcard/dynamic prompts. With this syntax "{wild|card|test}" will be randomly replaced by either "wild", "card" or "test" by the frontend every time you queue the prompt. To use {} characters in your actual prompt escape them like: \\{ or \\}.
-
-Dynamic prompts also support C-style comments, like `// comment` or `/* comment */`.
-
-To use a textual inversion concepts/embeddings in a text prompt put them in the models/embeddings directory and use them in the CLIPTextEncode node like this (you can omit the .pt extension):
-
-```embedding:embedding_filename.pt```
-
-
-## How to show high-quality previews?
-
-Use ```--preview-method auto``` to enable previews.
-
-The default installation includes a fast latent preview method that's low-resolution. To enable higher-quality previews with [TAESD](https://github.com/madebyollin/taesd), download the [taesd_decoder.pth, taesdxl_decoder.pth, taesd3_decoder.pth and taef1_decoder.pth](https://github.com/madebyollin/taesd/) and place them in the `models/vae_approx` folder. Once they're installed, restart ComfyUI and launch it with `--preview-method taesd` to enable high-quality previews.
-
-## How to use TLS/SSL?
-Generate a self-signed certificate (not appropriate for shared/production use) and key by running the command: `openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -sha256 -days 3650 -nodes -subj "/C=XX/ST=StateName/L=CityName/O=CompanyName/OU=CompanySectionName/CN=CommonNameOrHostname"`
-
-Use `--tls-keyfile key.pem --tls-certfile cert.pem` to enable TLS/SSL, the app will now be accessible with `https://...` instead of `http://...`.
-
-> Note: Windows users can use [alexisrolland/docker-openssl](https://github.com/alexisrolland/docker-openssl) or one of the [3rd party binary distributions](https://wiki.openssl.org/index.php/Binaries) to run the command example above. 
-<br/><br/>If you use a container, note that the volume mount `-v` can be a relative path so `... -v ".\:/openssl-certs" ...` would create the key & cert files in the current directory of your command prompt or powershell terminal.
-
-## Support and dev channel
-
-[Matrix space: #comfyui_space:matrix.org](https://app.element.io/#/room/%23comfyui_space%3Amatrix.org) (it's like discord but open source).
-
-See also: [https://www.comfy.org/](https://www.comfy.org/)
-
-## Frontend Development
-
-As of August 15, 2024, we have transitioned to a new frontend, which is now hosted in a separate repository: [ComfyUI Frontend](https://github.com/Comfy-Org/ComfyUI_frontend). This repository now hosts the compiled JS (from TS/Vue) under the `web/` directory.
-
-### Reporting Issues and Requesting Features
-
-For any bugs, issues, or feature requests related to the frontend, please use the [ComfyUI Frontend repository](https://github.com/Comfy-Org/ComfyUI_frontend). This will help us manage and address frontend-specific concerns more efficiently.
-
-### Using the Latest Frontend
-
-The new frontend is now the default for ComfyUI. However, please note:
-
-1. The frontend in the main ComfyUI repository is updated weekly.
-2. Daily releases are available in the separate frontend repository.
-
-To use the most up-to-date frontend version:
-
-1. For the latest daily release, launch ComfyUI with this command line argument:
-
-   ```
-   --front-end-version Comfy-Org/ComfyUI_frontend@latest
-   ```
-
-2. For a specific version, replace `latest` with the desired version number:
-
-   ```
-   --front-end-version Comfy-Org/ComfyUI_frontend@1.2.2
-   ```
-
-This approach allows you to easily switch between the stable weekly release and the cutting-edge daily updates, or even specific versions for testing purposes.
-
-### Accessing the Legacy Frontend
-
-If you need to use the legacy frontend for any reason, you can access it using the following command line argument:
-
-```
---front-end-version Comfy-Org/ComfyUI_legacy_frontend@latest
+```powershell
+& 'D:\IA-Local\ComfyUI\venv\Scripts\python.exe' 'D:\IA-Local\ComfyUI\main.py' --cpu --listen 127.0.0.1 --port 8188
 ```
 
-This will use a snapshot of the legacy frontend preserved in the [ComfyUI Legacy Frontend repository](https://github.com/Comfy-Org/ComfyUI_legacy_frontend).
+Aguarde a inicialização e acesse `http://127.0.0.1:8188`. Em uma máquina com GPU compatível, use os parâmetros recomendados pela documentação oficial do ComfyUI.
 
-# QA
+### Terminal C — WMK Agent Studio
 
-### Which GPU should I buy for this?
+```powershell
+cd 'D:\Ferramentas\WMK-Agent-Studio'
+python server.py
+```
 
-[See this page for some recommendations](https://github.com/comfyanonymous/ComfyUI/wiki/Which-GPU-should-I-buy-for-ComfyUI)
+Abra `http://127.0.0.1:8765`. No ambiente original, também é possível usar `INICIAR-WMK.bat`.
 
+## 5. Primeira conversa e provedores
+
+Abra o Studio, crie uma conversa, selecione **Ollama Local**, consulte os modelos e escolha um modelo instalado. Em **Agentes**, escolha o agente ou crie um com um prompt de sistema próprio.
+
+Para Groq ou outra API compatível, cadastre o endereço da API, modelo e chave na interface. **Nunca publique chaves, arquivos locais de configuração ou históricos pessoais no GitHub.** A compatibilidade de ferramentas varia entre provedores e modelos.
+
+## 6. Como funciona a geração de imagem
+
+```text
+Pedido no chat
+  → IA de texto propõe a ferramenta gerar_imagem
+  → usuário revisa prompt e parâmetros
+  → usuário autoriza
+  → servidor monta JSON de API
+  → ComfyUI executa nós e salva PNG
+  → Studio consulta status e exibe imagem
+```
+
+A geração também pode ser iniciada pelo botão **Gerar imagem**. A ponte com ComfyUI usa **API HTTP direta**; não depende de executar um servidor MCP.
+
+**Prompt positivo** descreve o que incluir. **Prompt negativo** descreve o que desencorajar. **Steps** controla iterações; **CFG** influencia aderência ao texto; **sampler/scheduler** definem a estratégia de amostragem; **seed** permite comparar resultados; **LoRA** aplica uma especialização de estilo ao checkpoint.
+
+Configuração inicial para comparar personagens 2D: 384×384, 20–24 steps, CFG 7, DPM++ 2M, Karras, seed fixa e LoRA Pixel Art com força 0,7. **Não é garantia de qualidade.** Confira o guia detalhado para entender cada parâmetro.
+
+### LoRA Pixel Art
+
+O arquivo `pytorch_lora_weights.safetensors` deve estar em `ComfyUI/models/loras/`. O workflow do Studio contém integração com `LoraLoader` e opção para desativá-lo ou ajustar a força. LoRA **não** substitui checkpoint e não produz automaticamente spritesheets animados consistentes. Confira licença e compatibilidade do modelo na página do autor antes de usar comercialmente.
+
+### Onde ficam as imagens?
+
+O ComfyUI salva arquivos PNG em sua pasta `output/`; no ambiente de desenvolvimento: `D:\IA-Local\ComfyUI\output`. O Studio também oferece link de download quando a geração termina.
+
+## 7. Diagnóstico
+
+| Problema | O que verificar |
+|---|---|
+| Studio não abre | Python, porta 8765, terminal com erro, firewall local |
+| Ollama não responde | `ollama serve`, porta 11434, modelo instalado, RAM |
+| ComfyUI não responde | Processo em execução, porta 8188, logs, inicialização demorada |
+| LoRA não aparece | Pasta `models/loras`, reinício, nome do arquivo, compatibilidade |
+| Imagem ruim | Checkpoint, LoRA, prompt, seed, resolução, sampler, parâmetros e expectativas de sprites |
+| Erro ao salvar | Permissões da pasta `output`, espaço em disco, status do workflow |
+| CPU muito lenta | Reduza resolução, steps e batch; avalie GPU compatível |
+
+Para reproduzir uma imagem, registre modelo, LoRA, força, prompts, resolução, seed, steps, CFG, sampler e scheduler.
+
+## 8. Estrutura do projeto
+
+```text
+WMK-Agent-Studio/
+├── server.py               # API HTTP, agentes, ComfyUI
+├── web/                    # interface HTML, CSS e JavaScript
+├── manuais/                # documentação em português
+├── data/                   # estado local (não publicar)
+└── INICIAR-WMK.bat         # inicializador com caminhos locais
+```
+
+## 9. Referências
+
+- [ComfyUI — código e documentação](https://github.com/Comfy-Org/ComfyUI)
+- [Ollama](https://ollama.com/)
+- [Hugging Face — modelos](https://huggingface.co/models)
+- [Civitai — modelos](https://civitai.com/models)
+
+**Créditos:** Walney Moreira Klein — walneyk@hotmail.com
+
+> Documentação destinada a estudo e colaboração. Não publique arquivos de pesos de terceiros sem verificar suas licenças, nem dados pessoais, chaves de API ou arquivos de estado local.
